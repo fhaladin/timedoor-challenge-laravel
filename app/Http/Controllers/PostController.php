@@ -72,6 +72,7 @@ class PostController extends Controller
             } else {
                 if (isset($request->image)) {
                     $file = $request->file('image');
+                    Self::delete_image($post->image);
                     Post::find($post->id)->update([
                         'image' => $post->id . '.' . $file->getClientOriginalExtension()
                     ]);
