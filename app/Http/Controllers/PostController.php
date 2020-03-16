@@ -74,11 +74,11 @@ class PostController extends Controller
                 if (isset($image) && !isset($delete_image)) {
                     $image->store('public');
                 }
+                Post::find($post->id)->update([
+                    'image' => (!empty($image) && !isset($delete_image)) ? $image->hashName() : null
+                ]);
             }
 
-            Post::find($post->id)->update([
-                'image' => (!empty($image) && !isset($delete_image)) ? $image->hashName() : null
-            ]);
 
             return redirect()->back();
         }
