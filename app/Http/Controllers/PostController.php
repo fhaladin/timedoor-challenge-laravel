@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 use App\Post;
-use Validator;
 use File;
 
 class PostController extends Controller
@@ -17,8 +19,7 @@ class PostController extends Controller
             'image'     => 'mimes:jpeg,jpg,png,gif|max:1024',
             'name'      => 'required|string|min:3|max:16',
             'title'     => 'required|string|min:10|max:32',
-            'body'      => 'required|string|min:10|max:200',
-            'password'  => 'required|string'
+            'body'      => 'required|string|min:10|max:200'
         );
     }
 
@@ -37,55 +38,54 @@ class PostController extends Controller
                 'name'      => $request->name,
                 'title'     => $request->title,
                 'body'      => $request->body,
-                'password'  => $request->password
+                'password'  => bcrypt($request->password)
             ]);
             
             if (isset($request->image)) {
-                $file = $request->file('image');
+                $image = $request->file('image');
+                $image->store('public');
+               
                 Post::find($post->id)->update([
-                    'image' => $post->id . '.' . $file->getClientOriginalExtension()
+                    'image' => $image->hashName()
                 ]);
-
-                $file->move('image', $post->id .  '.' . $file->getClientOriginalExtension());
             }
                     
             return redirect()->back();
         };
     }
-
-    public function update(Request $request, $id){
+    
+    public function update(Request $request){
         $validator = Validator::make($request->all(), $this->rules);
+        $delete_image = $request->delete_image;
+        $image = $request->file('image');
 
         if ($validator->fails()){
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->withErrors($validator);
         } else {
-            $post = Post::find($id);
+            $post = Post::find(Auth::guard('post')->user()->id);
             $post->update([
                 'name'      => $request->name,
                 'title'     => $request->title,
-                'body'      => $request->body,
-                'password'  => $request->password
+                'body'      => $request->body
             ]);
 
-            if (isset($request->delete_image)) {
+            if (isset($delete_image) || isset($image)) {
                 Self::delete_image($post->image);
-            } else {
-                if (isset($request->image)) {
-                    $file = $request->file('image');
-                    Self::delete_image($post->image);
-                    Post::find($post->id)->update([
-                        'image' => $post->id . '.' . $file->getClientOriginalExtension()
-                    ]);
-    
-                    $file->move('image', $post->id .  '.' . $file->getClientOriginalExtension());
+                if (isset($image) && !isset($delete_image)) {
+                    $image->store('public');
                 }
             }
+
+            Post::find($post->id)->update([
+                'image' => (!empty($image) && !isset($delete_image)) ? $image->hashName() : null
+            ]);
 
             return redirect()->back();
         }
     }
 
-    public function destroy($id){
+    public function destroy(){
+        $id = Auth::guard('post')->user()->id;
         $post = Post::find($id);
 
         Self::delete_image($post->image);
@@ -95,7 +95,7 @@ class PostController extends Controller
     }
 
     public function delete_image($image){
-        $image_path = public_path('image/' . $image);
+        $image_path = storage_path('app/public/' . $image);
 
         if(File::exists($image_path)) {
             File::delete($image_path);
@@ -103,22 +103,17 @@ class PostController extends Controller
     }
 
     public function password_check(Request $request){
-        $post = Post::find($request->id);
-        
-        if ($request->password === $post->password) {
-            $response = $post;
-            if ($request->edit) {
-                $response['edit'] = $request->edit;
-                $response['edit_url'] = route('post.update', $post->id);
-                $response['edit_image'] = asset('image/' . $post->image);
-            } else {
-                $response['delete_url'] = route('post.destroy', $post->id);
-            }
+        session(['id' => $request->id ?? session('id')]);
+        $post = Post::find(session('id'));
+
+        if (Auth::guard('post')->attempt(['id' => session('id'), 'password' => $request->password])) {
+            $response          = Auth::guard('post')->user();
+            $response['edit']  = ($request->edit) ? TRUE : FALSE ;
+            $response['image'] = (!empty($post->image)) ? asset('storage/' . $post->image) : 'http://via.placeholder.com/500x500' ;
         } else {
             $response['error'] = TRUE;
         }
-        
+
         return response()->json($response);
     }
-
 }

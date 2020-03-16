@@ -43,7 +43,7 @@
             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h4 class="modal-title" id="myModalLabel">Edit Item</h4>
           </div>
-          <form action="" method="post" id="editForm" enctype="multipart/form-data">
+          <form action="{{ route('post.update', 0) }}" method="post" id="editForm" enctype="multipart/form-data">
             @method('put')
             @csrf
             <div class="modal-body">
@@ -80,10 +80,6 @@
                   </div>
                 </div>
               </div>
-              <div class="form-group">
-                <label>Password</label>
-                <input name="password" id="editPassword" type="password" class="form-control">
-              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -100,7 +96,7 @@
             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <h4 class="modal-title" id="myModalLabel">Delete Data</h4>
           </div>
-          <form id="deleteForm" action="" method="post">
+          <form id="deleteForm" action="{{ route('post.destroy', 0) }}" method="post">
             @method('delete')
             @csrf
             <div class="modal-body pad-20">
@@ -125,7 +121,15 @@
             <p>The passwords you entered do not match. Please try again.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <form class="form-password-check form-inline" action="{{ route('password_check') }}" method="post">
+              @csrf
+              <div class="form-group mx-sm-3 mb-2">
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input type="password" class="form-control password" name="password" id="inputPassword" placeholder="Password">
+              </div>
+              <button type="submit" name="edit" value="edit" class="btn btn-default mb-2"><i class="fa fa-pencil p-3"></i></button>
+              <button type="submit" name="delete" value="delete" class="btn btn-danger mb-2"><i class="fa fa-trash p-3"></i></button>
+            </form>
           </div>
         </div>
       </div>
@@ -156,23 +160,23 @@
       $('.form-password-check').ajaxForm({
         success: function(response) {
           $('.password').val('');
-          
-          if (response.error) {
-            $('#errorModal').modal();     
-          } else {
-            if (response.edit) {
-              $('#editName').val(response.name);
-              $('#editTitle').val(response.title);
-              $('#editBody').html(response.body);
-              $('#editPassword').val(response.password);
-              $('#editImage').attr('src', response.edit_image);
-              $('#editForm').attr('action', response.edit_url);
-              $('#editModal').modal();
-            } else {
-              $('#deleteForm').attr('action', response.delete_url);
-              $('#deleteModal').modal();
+          $('#errorModal').modal('hide');  
+         
+          setTimeout(function(){ 
+            if (response.error) {
+              $('#errorModal').modal();     
+            }else{
+              if(response.edit) {
+                $('#editName').val(response.name);
+                $('#editTitle').val(response.title);
+                $('#editBody').html(response.body);
+                $('#editImage').attr('src', response.image);
+                $('#editModal').modal();
+              } else {
+                $('#deleteModal').modal();
+              }
             }
-          }
+          }, 500);   
         }
       });
     </script>

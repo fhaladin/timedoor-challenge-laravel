@@ -4,15 +4,15 @@
     @csrf
     <div class="form-group">
       <label>Name</label>
-      <input type="text" name="name" class="form-control" value="">
+      <input type="text" name="name" class="form-control" value="{{ old('name') }}">
     </div>
     <div class="form-group">
       <label>Title</label>
-      <input type="text" name="title" class="form-control" value="">
+      <input type="text" name="title" class="form-control" value="{{ old('title') }}">
     </div>
     <div class="form-group">
       <label>Body</label>
-      <textarea rows="5" name="body" class="form-control"></textarea>
+      <textarea rows="5" name="body" class="form-control">{{ old('body') }}</textarea>
     </div>
     <div class="form-group">
       <label>Choose image from your computer :</label>
@@ -45,11 +45,15 @@
         </div>
       </div>
       <h4 class="mb-20">{{ $post->name }} <span class="text-id">-</span></h4>
-      <p>{{ $post->body }}</p>
+      <p style="white-space: pre-line">{{ $post->body }}</p>
       <br>
       <div class="form-group row">
         <div class="col-md-5">
-          <img class="img-responsive img-post" src="{{ asset('image/' . $post->image) }}" alt="">
+          @if (!empty($post->image))
+            <img class="img-responsive img-post" src="{{ asset('storage/' . $post->image) }}" alt="">
+          @else
+            <img class="img-responsive img-post" src="http://via.placeholder.com/500x500" alt="image">
+          @endif
         </div>
         <form class="col-md-7 form-password-check form-inline mt-50" action="{{ route('password_check') }}" method="post">
           @csrf
