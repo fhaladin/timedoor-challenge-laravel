@@ -61,8 +61,8 @@ class PostController extends Controller
 
         if ($post->password != NULL) {
             if (Hash::check(session('password'), $post->password)) {
-                $validator      = Validator::make($request->all(), $this->rules);
-                $image          = $request->file('image');
+                $validator = Validator::make($request->all(), $this->rules);
+                $image     = $request->file('image');
         
                 if ($validator->fails()){
                     return redirect()->back()->withErrors($validator);
