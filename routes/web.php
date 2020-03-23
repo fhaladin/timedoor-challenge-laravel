@@ -17,5 +17,5 @@ Route::get('/', function () {
     return redirect('post');
 });
 
-Route::post('post/password_check', 'PostController@password_check')->name('password_check');
+Route::post('post/password_check/{id}', 'PostController@password_check')->name('password_check');
 Route::resource('post', 'PostController');

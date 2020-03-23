@@ -46,15 +46,6 @@ return [
             'provider' => 'users',
             'hash' => false,
         ],
-        'post' => [
-            'driver' => 'session',
-            'provider' => 'post',
-          ],
-  
-        'post-api' => [
-            'driver' => 'token',
-            'provider' => 'post',
-        ],
     ],
 
     /*
@@ -78,11 +69,6 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\User::class,
-        ],
-
-        'post' => [
-            'driver' => 'eloquent',
-            'model' => App\Post::class,
         ],
 
         // 'users' => [

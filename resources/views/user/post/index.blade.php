@@ -1,4 +1,4 @@
-@extends('template.master')
+@extends('user.template.master')
 @section('content')
   <form action="{{ route('post.store') }}" id="storeForm" method="post" enctype="multipart/form-data">
     @csrf
@@ -44,26 +44,26 @@
           <p class="text-lgray">{{ date('Y-m-d', strtotime($post->created_at)) }}<br/><span class="small">{{ date('H:i', strtotime($post->created_at)) }}</span></p>
         </div>
       </div>
-      <h4 class="mb-20">{{ $post->name }} <span class="text-id">-</span></h4>
+      <h4 class="mb-20">{{ $post->name }}</h4>
       <p style="white-space: pre-line">{{ $post->body }}</p>
       <br>
       <div class="form-group row">
         <div class="col-md-5">
           @if (!empty($post->image))
-            <img class="img-responsive img-post" src="{{ asset('storage/' . $post->image) }}" alt="">
+            <img class="img-responsive img-post" src="{{ asset('storage/post/' . $post->image) }}" alt="">
           @else
             <img class="img-responsive img-post" src="http://via.placeholder.com/500x500" alt="image">
           @endif
         </div>
-        <form class="col-md-7 form-password-check form-inline mt-50" action="{{ route('password_check') }}" method="post">
+        <form class="col-md-7 form-password-check form-inline mt-50" action="{{ route('password_check', ['id' => $post]) }}" method="post">
           @csrf
           <div class="form-group mx-sm-3 mb-2">
             <label for="inputPassword{{ $post->id }}" class="sr-only">Password</label>
             <input type="password" class="form-control password" name="password" id="inputPassword{{ $post->id }}" placeholder="Password">
             <input type="hidden" name="id" value="{{ $post->id }}">
           </div>
-          <button type="submit" name="edit" value="edit" class="btn btn-default mb-2"><i class="fa fa-pencil p-3"></i></button>
-          <button type="submit" name="delete" value="delete" class="btn btn-danger mb-2"><i class="fa fa-trash p-3"></i></button>
+          <button type="submit" name="edit" value="edit" class="btn btn-default mb-2" onclick="password_check()"><i class="fa fa-pencil p-3"></i></button>
+          <button type="submit" name="delete" value="delete" class="btn btn-danger mb-2" onclick="password_check()"><i class="fa fa-trash p-3"></i></button>
         </form>
       </div>
     </div>
