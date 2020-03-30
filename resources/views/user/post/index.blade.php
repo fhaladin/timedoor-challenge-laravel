@@ -44,7 +44,7 @@
           <p class="text-lgray">{{ date('Y-m-d', strtotime($post->created_at)) }}<br/><span class="small">{{ date('H:i', strtotime($post->created_at)) }}</span></p>
         </div>
       </div>
-      <h4 class="mb-20">{{ $post->name }}</h4>
+      <h4 class="mb-20">{{ $post->name ?? 'No Name' }}</h4>
       <p style="white-space: pre-line">{{ $post->body }}</p>
       <br>
       <div class="form-group row">

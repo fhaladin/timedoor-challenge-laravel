@@ -18,7 +18,7 @@ class PostController extends Controller
     {
         $this->rules = array(
             'image'    => 'mimes:jpeg,jpg,png,gif|max:1024',
-            'name'     => 'required|string|min:3|max:16',
+            'name'     => 'nullable|string|min:3|max:16',
             'title'    => 'required|string|min:10|max:32',
             'body'     => 'required|string|min:10|max:200',
             'password' => 'nullable|numeric|digits:4'

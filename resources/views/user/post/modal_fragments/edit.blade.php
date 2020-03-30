@@ -36,11 +36,10 @@
                         </span>
                     </span>
                 </div>
-                    <div class="checkbox">
-                        <label>
-                            <input name="delete_image" type="checkbox">Delete image
-                        </label>
-                    </div>
+                <div class="checkbox">
+                    <label>
+                        <input name="delete_image" type="checkbox">Delete image
+                    </label>
                 </div>
             </div>
         </div>
