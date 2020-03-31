@@ -18,4 +18,6 @@ Route::get('/', function () {
 });
 
 Route::post('post/password_check/{id}', 'PostController@password_check')->name('password_check');
-Route::resource('post', 'PostController');
+Route::resource('post', 'PostController')->middleware('verified.login');
+
+Auth::routes(['verify' => true]);

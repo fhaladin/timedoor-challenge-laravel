@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 
 use App\Models\Post;
 use File;
+use Auth;
 
 class PostController extends Controller
 {
@@ -44,6 +45,7 @@ class PostController extends Controller
             }
 
             Post::create([
+                'user_id'  => (Auth::user()) ? Auth::user()->id : null,
                 'name'     => $request->name,
                 'title'    => $request->title,
                 'body'     => $request->body,
@@ -59,31 +61,28 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if ($post->password != NULL) {
-            if (Hash::check(session('password'), $post->password)) {
-                $validator = Validator::make($request->all(), $this->rules);
-                $image     = $request->file('image');
-        
-                if ($validator->fails()){
-                    return redirect()->back()->withErrors($validator);
-                } else {
-        
-                    $post = Post::find($id);
-                    $post->update([
-                        'name'  => $request->name,
-                        'title' => $request->title,
-                        'body'  => $request->body
-                    ]);
-        
-                    if (isset($request->delete_image) || isset($image)) {
-                        Self::delete_image($post->image);
-                        if (isset($image) && !isset($delete_image)) {
-                            $image->store('public/post');
-                        }
-                        Post::find($post->id)->update([
-                            'image' => (!empty($image) && !isset($request->delete_image)) ? $image->hashName() : NULL
-                        ]);
+        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id == $post->user_id)) {
+            $validator = Validator::make($request->all(), $this->rules);
+            $image     = $request->file('image');
+    
+            if ($validator->fails()){
+                return redirect()->back()->withErrors($validator);
+            } else {
+                $post = Post::find($id);
+                $post->update([
+                    'name'  => $request->name,
+                    'title' => $request->title,
+                    'body'  => $request->body
+                ]);
+    
+                if (isset($request->delete_image) || isset($image)) {
+                    Self::delete_image($post->image);
+                    if (isset($image) && !isset($delete_image)) {
+                        $image->store('public/post');
                     }
+                    Post::find($post->id)->update([
+                        'image' => (!empty($image) && !isset($request->delete_image)) ? $image->hashName() : NULL
+                    ]);
                 }
             }
         }
@@ -95,11 +94,9 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if ($post->password != NULL) {
-            if (Hash::check(session('password'), $post->password)) {
-                Self::delete_image($post->image);
-                Post::destroy($id);
-            }
+        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id == $post->user_id)) {
+            Self::delete_image($post->image);
+            Post::destroy($id);
         }
 
         return redirect()->back();
@@ -118,8 +115,8 @@ class PostController extends Controller
     {
         $post   = Post::find($id);
         $action = (isset($request->edit)) ? 'edit' : 'delete';
-        
-        if (isset($post->password) && Hash::check($request->password, $post->password)) {
+
+        if ((Hash::check($request->password, $post->password)) || (Auth::check() && Auth::user()->id == $post->user_id)) {
             session(['password' => $request->password]);
             return view('user/post/modal_fragments/' . $action, compact('post'));
         } else {

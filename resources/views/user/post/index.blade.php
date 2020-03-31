@@ -4,7 +4,7 @@
     @csrf
     <div class="form-group">
       <label>Name</label>
-      <input type="text" name="name" class="form-control" value="{{ old('name') }}">
+      <input type="text" name="name" class="form-control" value="{{ (!Auth::user()) ? old('name') : Auth::user()->name }}">
     </div>
     <div class="form-group">
       <label>Title</label>
@@ -25,16 +25,21 @@
         </span>
       </div>
     </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" name="password" class="form-control">
-    </div>
+    @if (!Auth::check())
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control">
+      </div>
+    @endif
     <div class="text-center mt-30 mb-30">
       <button class="btn btn-primary">Submit</button>
     </div>
   </form>
   <hr>
   @foreach ($posts as $post)
+    @php
+      $condition = (Auth::check()) ? Auth::user()->id == $post->user_id : !isset($post->user_id);
+    @endphp
     <div class="post">
       <div class="clearfix">
         <div class="pull-left">
@@ -44,7 +49,7 @@
           <p class="text-lgray">{{ date('Y-m-d', strtotime($post->created_at)) }}<br/><span class="small">{{ date('H:i', strtotime($post->created_at)) }}</span></p>
         </div>
       </div>
-      <h4 class="mb-20">{{ $post->name ?? 'No Name' }}</h4>
+      <h4 class="mb-20">{{ $post->name ?? 'No Name' }} <span class="text-id">{{ (isset($post->user_id)) ? '[ID:' . $post->user_id . ']' : null }}</span></h4>
       <p style="white-space: pre-line">{{ $post->body }}</p>
       <br>
       <div class="form-group row">
@@ -55,16 +60,20 @@
             <img class="img-responsive img-post" src="http://via.placeholder.com/500x500" alt="image">
           @endif
         </div>
-        <form class="col-md-7 form-password-check form-inline mt-50" action="{{ route('password_check', ['id' => $post]) }}" method="post">
-          @csrf
-          <div class="form-group mx-sm-3 mb-2">
-            <label for="inputPassword{{ $post->id }}" class="sr-only">Password</label>
-            <input type="password" class="form-control password" name="password" id="inputPassword{{ $post->id }}" placeholder="Password">
-            <input type="hidden" name="id" value="{{ $post->id }}">
-          </div>
-          <button type="submit" name="edit" value="edit" class="btn btn-default mb-2" onclick="password_check()"><i class="fa fa-pencil p-3"></i></button>
-          <button type="submit" name="delete" value="delete" class="btn btn-danger mb-2" onclick="password_check()"><i class="fa fa-trash p-3"></i></button>
-        </form>
+        @if ($condition)
+          <form class="col-md-7 form-password-check form-inline mt-50" action="{{ route('password_check', ['id' => $post, 'user_id' => $post->user_id ?? 0]) }}" method="post">
+            @csrf
+            @if (!Auth::check())
+              <div class="form-group mx-sm-3 mb-2">
+                <label for="inputPassword{{ $post->id }}" class="sr-only">Password</label>
+                <input type="password" class="form-control password" name="password" id="inputPassword{{ $post->id }}" placeholder="Password">
+                <input type="hidden" name="id" value="{{ $post->id }}">
+              </div>
+            @endif
+            <button type="submit" name="edit" value="edit" class="btn btn-default mb-2" onclick="password_check()"><i class="fa fa-pencil p-3"></i></button>
+            <button type="submit" name="delete" value="delete" class="btn btn-danger mb-2" onclick="password_check()"><i class="fa fa-trash p-3"></i></button>
+          </form>
+        @endif
       </div>
     </div>
   @endforeach
