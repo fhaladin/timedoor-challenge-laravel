@@ -13,17 +13,15 @@ use Auth;
 
 class PostController extends Controller
 {
-    private $rules;
-
-    public function __construct()
+    protected function validator(array $data)
     {
-        $this->rules = array(
+        return Validator::make($data, [
             'image'    => 'mimes:jpeg,jpg,png,gif|max:1024',
             'name'     => 'nullable|string|min:3|max:16',
             'title'    => 'required|string|min:10|max:32',
             'body'     => 'required|string|min:10|max:200',
             'password' => 'nullable|numeric|digits:4'
-        );
+        ]);
     }
 
     public function index()
@@ -34,7 +32,7 @@ class PostController extends Controller
     
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), $this->rules);
+        $validator = Self::validator($request->all());
 
         if ($validator->fails()){
             return redirect()->back()->withErrors($validator)->withInput();
@@ -61,8 +59,8 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id == $post->user_id)) {
-            $validator = Validator::make($request->all(), $this->rules);
+        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id === $post->user_id)) {
+            $validator = Self::validator($request->all());
             $image     = $request->file('image');
     
             if ($validator->fails()){
@@ -94,7 +92,7 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id == $post->user_id)) {
+        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id === $post->user_id)) {
             Self::delete_image($post->image);
             Post::destroy($id);
         }
@@ -116,7 +114,7 @@ class PostController extends Controller
         $post   = Post::find($id);
         $action = (isset($request->edit)) ? 'edit' : 'delete';
 
-        if ((Hash::check($request->password, $post->password)) || (Auth::check() && Auth::user()->id == $post->user_id)) {
+        if ((Hash::check($request->password, $post->password)) || (Auth::check() && Auth::user()->id === $post->user_id)) {
             session(['password' => $request->password]);
             return view('user/post/modal_fragments/' . $action, compact('post'));
         } else {
