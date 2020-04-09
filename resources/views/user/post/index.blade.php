@@ -4,15 +4,15 @@
     @csrf
     <div class="form-group">
       <label>Name</label>
-      <input type="text" name="name" class="form-control" value="{{ (!Auth::user()) ? old('name') : Auth::user()->name }}">
+      <input type="text" name="name" class="form-control" value="{{ (!Auth::user()) ? ((old('_method') != 'put') ? old('name') : '') : Auth::user()->name }}">
     </div>
     <div class="form-group">
       <label>Title</label>
-      <input type="text" name="title" class="form-control" value="{{ old('title') }}">
+      <input type="text" name="title" class="form-control" value="{{ (old('_method') != 'put') ? old('title') : '' }}">
     </div>
     <div class="form-group">
       <label>Body</label>
-      <textarea rows="5" name="body" class="form-control">{{ old('body') }}</textarea>
+      <textarea rows="5" name="body" class="form-control">{{ (old('_method') != 'put') ? old('body') : '' }}</textarea>
     </div>
     <div class="form-group">
       <label>Choose image from your computer :</label>
