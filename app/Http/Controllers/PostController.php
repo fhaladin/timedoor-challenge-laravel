@@ -54,7 +54,7 @@ class PostController extends Controller
             ]);
 
             if (isset($request->delete_image) || isset($image)) {
-                Self::delete_image($post->image);
+                Self::delete_image($id);
                 if (isset($image) && !isset($delete_image)) {
                     $image->store('public/post');
                 }
@@ -71,21 +71,32 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id === $post->user_id)) {
-            Self::delete_image($post->image);
-            Post::destroy($id);
+        if (Hash::check(session('password'), $post->password) || (Auth::check() && Auth::user()->id === $post->user_id) || Auth::guard('admin')->check()) {
+            Post::destroy(explode(',', $id));
         }
 
         return redirect()->back();
     }
 
-    public function delete_image($image)
+    public function delete_image($id, $redirect = false)
     {
-        $image_path = storage_path('app/public/post/' . $image);
+        $post       = Post::find($id);
+        $image_path = storage_path('app/public/post/' . $post->image);
 
         if(File::exists($image_path)) {
             File::delete($image_path);
+            $post->update(['image' => NULL]);
         }
+
+        if ($redirect) {
+            return redirect()->back();
+        }
+    }
+
+    public function restore($id)
+    {
+        Post::onlyTrashed()->find($id)->restore();
+        return redirect()->back();
     }
 
     public function password_check(Request $request, $id)
