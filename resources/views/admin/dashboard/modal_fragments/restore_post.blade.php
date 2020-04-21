@@ -8,7 +8,7 @@
     <p>Are you sure want to restore this item?</p>
   </div>
   <div class="modal-footer">
-    <form id="deleteForm" action="{{ route('post.restore', $id) }}" method="post">
+    <form id="deleteForm" class="form-action" action="{{ route('admin.post.restore', $id) }}" method="post" onsubmit="modal_dismiss()">
         @csrf
         <button type="submit" class="btn btn-default">Restore</button>
     </form>

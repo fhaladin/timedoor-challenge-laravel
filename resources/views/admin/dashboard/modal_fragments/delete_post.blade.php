@@ -12,7 +12,7 @@
     @endif
 </div>
 <div class="modal-footer">
-    <form id="deleteForm" action="{{ route('post.destroy', $id ?? 0) }}" method="post">
+    <form id="deleteForm" class="form-action" action="{{ route('admin.post.destroy', $id ?? 0) }}" method="post" onsubmit="modal_dismiss()">
         @method('delete')
         @csrf
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

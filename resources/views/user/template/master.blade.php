@@ -25,6 +25,9 @@
                   <br>
                 @endif
               @endif
+              @if (session('error'))
+                <p class="mt-5 small text-danger text-center">*{{ session('error') }}</p>
+              @endif
               @yield('content')
             </div>
           </div>

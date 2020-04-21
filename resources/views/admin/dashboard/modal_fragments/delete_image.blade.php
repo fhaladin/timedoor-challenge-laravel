@@ -8,7 +8,7 @@
   <p>Are you sure want to delete this image?</p>
 </div>
 <div class="modal-footer">
-  <form id="deleteForm" action="{{ route('delete_image', ['id' => $id, 'redirect' => TRUE]) }}" method="post">
+  <form id="deleteForm" class="form-action" action="{{ route('admin.image.destroy', ['id' => $id]) }}" method="post" onclick="modal_dismiss()">
     @method('delete')
     @csrf
     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

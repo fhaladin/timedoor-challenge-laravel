@@ -1,1 +1,3 @@
-{{ date('Y/m/d', $created_at) }}<br><span class="small">{{ date('H:i:s', $created_at) }}</span>
+<div class="datetime">
+    <br><span class="small time"></span>
+</div>

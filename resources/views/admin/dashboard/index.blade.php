@@ -145,17 +145,19 @@
           {data: 'id', name: 'id', sortable: false},
           {data: 'title', name: 'title', sortable: false},
           {data: 'body', name: 'body', sortable: false},
-          {data: 'image', name: 'image', sortable: false},
+          {data: 'image_html', name: 'image_html', sortable: false},
           {data: 'date', name: 'date', sortable: false},
           {data: 'action', name: 'action', sortable: false},
         ],
         drawCallback: function(setting) {
           json        = setting.json;
           currentPage = json.input.start / json.input.length;
+          prevPage    = currentPage - 1;
+          nextPage    = currentPage + 1;
 
           $('.pagination').empty();
           $('.pagination').append(
-            '<li><a href="#">&laquo;</a></li>'
+            '<li><a href="#" onclick="jump_page(' + prevPage + ')">&laquo;</a></li>'
           );
           for (let i = 0; i < json.recordsTotal / 20; i++) {
             $('.pagination').append(
@@ -163,13 +165,37 @@
             );
           }
           $('.pagination').append(
-            '<li><a href="#">&raquo;</a></li>'
+            '<li><a href="#" onclick="jump_page(' + nextPage + ')">&raquo;</a></li>'
           );
         },
         fnRowCallback: function(nRow, aData) {
+          datetime = new Date(aData.created_at);
+          arr_date = [datetime.getFullYear(), ("0" + (datetime.getMonth() + 1)).slice(-2), datetime.getDate()];
+          arr_time = [(datetime.getHours() - 1), datetime.getMinutes(), datetime.getSeconds()]; 
+          date     = arr_date.join('/');
+          time     = arr_time.join(':');
+
           if (aData.deleted_at) {
             $('td', nRow).addClass('bg-gray-light');
+            $('td > input[type="checkbox"]', nRow).remove();
+            $('td > .btn-restore-post', nRow)
+              .removeClass('hide')
+              .attr('onclick', 'modal(' + aData.id + ', "restore_post")');
+          } else {
+            $('td > .btn-delete-post', nRow)
+              .removeClass('hide')
+              .attr('onclick', 'modal(' + aData.id + ', "delete_post")');
           }
+
+          if (!aData.image) {
+            $('td > .img-html', nRow).remove();
+          }
+
+          $('td > input[type="checkbox"]', nRow).val(aData.id);
+          $('td > .btn-delete-image', nRow).attr('onclick', 'modal(' + aData.id +  ', "delete_image")');
+          $('td > .datetime', nRow).prepend(date);
+          $('td > .datetime .time', nRow).html(time);
+          $('td > img', nRow).attr('src', '{{ asset('storage/post') }}/' + aData.image);
         }
       };
     }
@@ -228,8 +254,20 @@
         },
         success: function(response){
           $('.modal-content').empty().html(response);
+          $('.form-action').ajaxForm({
+            success: function () {
+              table.ajax.reload(null, false);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+              alert(thrownError);
+            }
+          });
         }
       });
+    }
+
+    function modal_dismiss(){
+      $('#modal').modal('toggle');
     }
   </script>
 @endsection
