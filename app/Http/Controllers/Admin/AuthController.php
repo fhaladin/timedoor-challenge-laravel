@@ -19,7 +19,7 @@ class AuthController extends Controller
         return redirect()->back()->with(['error' => 'These credentials do not match our records.']);
     }
 
-    public function login_page()
+    public function loginPage()
     {
         return view('admin.auth.login');
     }

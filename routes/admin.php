@@ -1,15 +1,15 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-Route::middleware('auth.admin')->group(function() {
-    Route::get('', 'Admin\DashboardController@index')->name('admin.index');
-    Route::delete('{id}', 'Admin\DashboardController@destroy')->name('admin.post.destroy');
-    Route::delete('image/{id}', 'Admin\DashboardController@delete_image')->name('admin.image.destroy');
-    Route::post('restore/{id}', 'Admin\DashboardController@restore')->name('admin.post.restore');
-    Route::post('modal', 'Admin\DashboardController@modal')->name('admin.modal');
-    Route::post('table/{search?}', 'Admin\DashboardController@table')->name('admin.table');
+Route::name('admin.')->group(function() {
+    Route::middleware('auth.admin')->group(function() {
+        Route::get('', 'DashboardController@index')->name('index');
+        Route::delete('{id}', 'DashboardController@destroy')->name('post.destroy');
+        Route::delete('image/{id}', 'DashboardController@deleteImage')->name('image.destroy');
+        Route::post('restore/{id}', 'DashboardController@restore')->name('post.restore');
+        Route::post('modal', 'DashboardController@modal')->name('modal');
+        Route::post('table/{search?}', 'DashboardController@table')->name('table');
+    });
+    
+    Route::get('login', 'AuthController@loginPage')->name('login.page');
+    Route::post('login', 'AuthController@login')->name('login');
 });
-
-Route::get('login', 'Admin\AuthController@login_page')->name('admin.login.page');
-Route::post('login', 'Admin\AuthController@login')->name('admin.login');

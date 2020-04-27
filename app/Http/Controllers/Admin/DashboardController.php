@@ -32,10 +32,12 @@ class DashboardController extends Controller
 
     public function destroy($id)
     {
-        $ids = explode(',', $id);
-     
-        Self::delete_image($ids);
+        $ids    = explode(',', $id);
+        $posts  = Post::whereIn('id', $ids);
+        $posts->update(['image' => NULL]);
+
         Post::destroy($ids);
+        Self::deleteImage($ids);
     }
 
     public function restore($id)
@@ -43,19 +45,21 @@ class DashboardController extends Controller
         Post::onlyTrashed()->find($id)->restore();
     }
 
-    public function delete_image($ids)
+    public function deleteImage($ids)
     {
         $ids = (is_array($ids)) ? $ids : explode(',', $ids);
-        
-        foreach ($ids as $id) {
-            $post       = Post::find($id);
+
+        $posts = Post::withTrashed()->whereIn('id', $ids);
+        $posts->update(['image' => NULL]);
+
+        foreach ($posts->get() as $post) {
             $image_path = storage_path('app/public/post/' . $post->image);
     
             if(File::exists($image_path)) {
                 File::delete($image_path);
-                $post->update(['image' => NULL]);
             }
         }
+
     }
 
     public function modal(Request $request)
@@ -66,7 +70,7 @@ class DashboardController extends Controller
         return view('admin.dashboard.modal_fragments.' . $type, compact('id'));
     }
 
-    public function search($request)
+    protected function search($request)
     {
         $posts = Post::where('title', 'like', "%".$request->title."%")->where('body', 'like', "%".$request->body."%");
 
