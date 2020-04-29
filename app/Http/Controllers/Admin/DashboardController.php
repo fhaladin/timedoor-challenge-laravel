@@ -34,7 +34,6 @@ class DashboardController extends Controller
     {
         $ids    = explode(',', $id);
         $posts  = Post::whereIn('id', $ids);
-        $posts->update(['image' => NULL]);
 
         Post::destroy($ids);
         Self::deleteImage($ids);
@@ -47,19 +46,21 @@ class DashboardController extends Controller
 
     public function deleteImage($ids)
     {
-        $ids = (is_array($ids)) ? $ids : explode(',', $ids);
+        $ids    = (is_array($ids)) ? $ids : explode(',', $ids);
+        $posts  = Post::withTrashed()->whereIn('id', $ids);
+        $images = $posts->select('image')->get()->toArray();
 
-        $posts = Post::withTrashed()->whereIn('id', $ids);
         $posts->update(['image' => NULL]);
 
-        foreach ($posts->get() as $post) {
-            $image_path = storage_path('app/public/post/' . $post->image);
-    
-            if(File::exists($image_path)) {
-                File::delete($image_path);
+        foreach ($images as $image) {
+            foreach ($image as $key => $value) {
+                $image_path = storage_path('app/public/post/' . $value);
+            
+                if(File::exists($image_path)) {
+                    File::delete($image_path);
+                }
             }
         }
-
     }
 
     public function modal(Request $request)
